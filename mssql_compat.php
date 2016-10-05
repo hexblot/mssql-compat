@@ -201,8 +201,10 @@ if(!function_exists('mssql_connect')) {
     }
   }
 
+  /*****************************************************************************
+  ********************** PART II - CLASS WITH PDO CALLS ************************
+  *****************************************************************************/
 
-// Internal Class to actually do the PDO stuff.
   class MSSQLCompat {
     private $dbh          = NULL;
     private $key          = '';
