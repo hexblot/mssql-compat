@@ -32,7 +32,7 @@ Just add an include to this library on the top of the old application `index.php
 
 ```php 
   <?php
-     include("path/to/mssql-compat.php");
+     include("path/to/mssql_compat.php");
      
      # Insert old application logic here
 ```
