@@ -26,6 +26,6 @@
     "support": {
       "source": "https://github.com/hexblot/mssql-compat",
       "issues": "https://github.com/hexblot/mssql-compat/issues"
-    }
+    },
     "minimum-stability": "dev"
 }
