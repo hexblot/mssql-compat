@@ -12,7 +12,7 @@
         "ext-pdo_dblib": "*"
     },
     "autoload": {
-        "files": ["mssql-compat.php"]
+        "files": ["mssql_compat.php"]
     },
     "license": "Apache-2.0",
     "authors": [
