@@ -1,0 +1,23 @@
+{
+    "name": "hexblot/mssql-compat",
+    "description": "Small wrapper for PDO that emulates the deprecated mssql_* functions, and allows legacy software to work in PHP7+",
+    "type": "library",
+    "require": {
+        "php": ">=7.0.0",
+        "ext-pdo": "*"
+    },
+    "conflict": {
+        "ext-mssql": "*"
+    },
+    "suggest": {
+        "ext-pdo_dblib": "*",
+    },
+    "license": "Apache License v2.0",
+    "authors": [
+        {
+            "name": "Nick Andriopoulos",
+            "email": "nand@hexblot.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
