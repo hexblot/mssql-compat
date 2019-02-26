@@ -8,6 +8,7 @@ if(!function_exists('mssql_connect')) {
   define('MSSQL_BOTH',  PDO::FETCH_BOTH );
 
   // Unfortunately MSSQL function assume too much, hence the need for pesky globals.
+  global $mssql_compat_metadata;
   $mssql_compat_metadata  = array(
     'last_key'   => '',
     'last_error' => '',
