@@ -112,7 +112,7 @@ The stored procedure API (`mssql_init` / `mssql_bind` / `mssql_execute`) is not 
 
 ## Upgrading from 0.2.x
 
-Version 0.3.0 changes behaviour in ways your application may notice:
+Version 0.3.1 changes behaviour in ways your application may notice:
 
  - Database errors used to be swallowed (PHP 5/7) or crash (PHP 8); they now return `FALSE` and raise a warning, so error paths in your code that never ran before will run now.
  - `mssql_connect()` returns `FALSE` on failure instead of a truthy link.
@@ -122,7 +122,7 @@ Version 0.3.0 changes behaviour in ways your application may notice:
 
 ## License
 
-MIT, since version 0.3.0. Versions up to 0.2.2 were released under the Apache License 2.0.
+MIT, since version 0.3.1. Versions up to 0.2.2 were released under the Apache License 2.0.
 
 ## Running the smoke test
 
