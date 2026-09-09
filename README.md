@@ -1,12 +1,12 @@
 # MSSQL-Compat
 
-MSSQL Compat is a small and simple drop-in library that allows your pre-7 PHP project, that uses MSSQL via mssql_* functions ( eg mssql_connect() et al ), to work transparently with PDO DBLib by providing the missing functions as wrappers around the equivalent PDO syntax - and all that with a single line!
+MSSQL Compat is a small and simple drop-in library that allows a legacy PHP project that uses MSSQL via the mssql_* functions ( eg mssql_connect() et al ), removed in PHP 7.0, to work transparently on PHP 5.3 through 8.x with PDO DBLib by providing the missing functions as wrappers around the equivalent PDO syntax - and all that with a single line!
 
 ## The story
 
 I recently started migrating internal web applications to new servers that use PHP7.
 
-Thus I stumbled on a couple of old applications that use MSSQL with PHP, which I dearly hoped to avoid rewriting and debugging now that PHP7 has deprecated the mssql_* family of functions.
+Thus I stumbled on a couple of old applications that use MSSQL with PHP, which I dearly hoped to avoid rewriting and debugging now that PHP 7 has removed the mssql_* family of functions.
 
 *The result* is this single-file solution: just include it before your first mssql_* call, and it will transparently wrap them to the equivalent PDO calls.
 
@@ -14,7 +14,7 @@ Thus I stumbled on a couple of old applications that use MSSQL with PHP, which I
 
  - This library is *not* a security enhancement by any measure. It assumes that your program logic escapes what needs to be escaped, since you cannot benefit from PDO goodness without changing the function syntax.
    - That being said, kindly let me know if you can provide better security in the given code.
- - It is **not** meant as a means to develop new software in PHP7 using mssql_* functions - use PDO or similar!
+ - It is **not** meant as a means to develop new software using mssql_* functions - use PDO or similar!
 
 ## Requirements
 
@@ -22,7 +22,7 @@ Thus I stumbled on a couple of old applications that use MSSQL with PHP, which I
   - [PDO] ( usually via the php-pdo package )
   - [PDO DBLib] installed (FreeTDS based; still shipped with PHP 8)
 
-> *Hint*: All of the above are easily usable via repos such as [IUS] or [Remi]
+> *Hint*: On RHEL-like systems the [Remi] repository provides `php-pdo-dblib`; on the official Docker images run `apt-get install freetds-dev && docker-php-ext-install pdo_dblib`.
 
 ## How to use
 
@@ -110,6 +110,20 @@ Note that the library switches the supplied connection to `PDO::ERRMODE_EXCEPTIO
 
 The stored procedure API (`mssql_init` / `mssql_bind` / `mssql_execute`) is not covered; call procedures with `mssql_query("EXEC ...")` instead. Patches are of course very welcomed!
 
+## Upgrading from 0.2.x
+
+Version 0.3.0 changes behaviour in ways your application may notice:
+
+ - Database errors used to be swallowed (PHP 5/7) or crash (PHP 8); they now return `FALSE` and raise a warning, so error paths in your code that never ran before will run now.
+ - `mssql_connect()` returns `FALSE` on failure instead of a truthy link.
+ - `mssql_select_db()` returns `TRUE` on success instead of `0`.
+ - `mssql_rows_affected()` takes a link identifier, per the original API, instead of a result.
+ - Results are buffered in memory; very large result sets need proportionally more memory.
+
+## License
+
+MIT, since version 0.3.0. Versions up to 0.2.2 were released under the Apache License 2.0.
+
 ## Running the smoke test
 
 The test uses an in-memory SQLite database, so it needs no SQL Server:
@@ -120,7 +134,6 @@ $ composer test
 $ docker run --rm -v "$PWD":/app php:5.6-cli php /app/tests/smoke_test.php
 ```
 
-  [PDO]: <http://php.net/manual/en/book.pdo.php>
-  [PDO DBLib]: <http://php.net/manual/en/ref.pdo-dblib.php>
-  [IUS]: <https://ius.io/>
-  [Remi]: <http://rpms.famillecollet.com/>
+  [PDO]: <https://www.php.net/manual/en/book.pdo.php>
+  [PDO DBLib]: <https://www.php.net/manual/en/ref.pdo-dblib.php>
+  [Remi]: <https://rpms.remirepo.net/>
