@@ -18,9 +18,8 @@
     "authors": [
         {
             "name": "Nick Andriopoulos",
-            "email": "nand@hexblot.com",
-            "homepage": "http://www.hexblot.com",
-            "role": "Developer"
+            "email": "nick.andriopoulos@lambda-twelve.com",
+            "role": "Maintainer"
         }
     ],
     "support": {
