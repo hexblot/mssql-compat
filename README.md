@@ -18,11 +18,9 @@ Thus I stumbled on a couple of old applications that use MSSQL with PHP, which I
 
 ## Requirements
 
-MSSQL-Compat requires the bare basics for PHP7 to be able to talk to MSSQL - namely:
-
-  - [PHP7]
+  - PHP 5.3 through 8.x (tested on 5.6, 7.4, 8.3 and 8.4)
   - [PDO] ( usually via the php-pdo package )
-  - [PDO DBLib] installed
+  - [PDO DBLib] installed (FreeTDS based; still shipped with PHP 8)
 
 > *Hint*: All of the above are easily usable via repos such as [IUS] or [Remi]
 
@@ -52,45 +50,76 @@ If your app doesn't already have one, add a require towards the `autoload.php` f
     require __DIR__.'/path/to/vendor/autoload.php';
 ```
 
-## Under the hood: Which functions are covered
+### Optional tuning
 
-This is the list of the functions that are currently covered. They were sufficient for my needs, but, understandably, you may need more for your projects. Let me know in the issues - patches are of course very welcomed!
+Extra DSN parameters (charset, TDS version, application name...) can be passed by defining a constant *before* the library is loaded:
+
+```php
+  define('MSSQL_COMPAT_DSN_OPTIONS', 'charset=UTF-8;version=7.4');
+```
+
+If your application already has an open PDO connection (for instance from a framework), legacy code can share it instead of opening a second one:
+
+```php
+  $link = mssql_compat_register_pdo($pdo);   // becomes the default link
+```
+
+Note that the library switches the supplied connection to `PDO::ERRMODE_EXCEPTION`.
+
+## Behaviour notes: how this differs from the original extension
+
+ - **Results are fully buffered at query time.** This mirrors the original extension's default (`batch_size = 0`), keeps the connection free so nested queries on the same link work, and makes `mssql_num_rows()`, `mssql_data_seek()` and `mssql_result()` reliable. Queries returning very large result sets will use memory accordingly; the `batch_size` argument to `mssql_query()` is accepted but ignored.
+ - **Link and result identifiers are strings**, not resources. `is_resource($link)` checks will fail; `if (!$link)` / `=== false` checks work as before.
+ - **Errors** set the text returned by `mssql_get_last_message()` and raise an `E_USER_WARNING`, like the original extension's warnings. Prefix them with `@` if your code did.
+ - `mssql_query()` returns `TRUE` for statements that produce no result set (INSERT, UPDATE, DELETE, DDL) and `FALSE` on error, as the original did.
+ - Stored procedures returning several result sets are supported through `mssql_next_result()`. Add `SET NOCOUNT ON` to procedures if you see spurious empty result sets.
+ - `mssql_min_error_severity()` / `mssql_min_message_severity()` are no-ops.
+
+## Under the hood: Which functions are covered
 
  - [ ] mssql_​bind
  - [x] mssql_​close
  - [x] mssql_​connect
- - [ ] mssql_​data_​seek
+ - [x] mssql_​data_​seek
  - [ ] mssql_​execute
  - [x] mssql_​fetch_​array
  - [x] mssql_​fetch_​assoc
- - [ ] mssql_​fetch_​batch
+ - [x] mssql_​fetch_​batch **(always returns 0: everything is already buffered)**
  - [x] mssql_​fetch_​field
  - [x] mssql_​fetch_​object
  - [x] mssql_​fetch_​row
  - [x] mssql_​field_​length
  - [x] mssql_​field_​name
  - [x] mssql_​field_​seek
- - [ ] mssql_​field_​type
+ - [x] mssql_​field_​type
  - [x] mssql_​free_​result
- - [ ] mssql_​free_​statement
+ - [x] mssql_​free_​statement
  - [x] mssql_​get_​last_​message
  - [x] mssql_​guid_​string
  - [ ] mssql_​init
  - [x] mssql_​min_​error_​severity **NOTE: Placeholder only to avoid errors!**
  - [x] mssql_​min_​message_​severity **NOTE: Placeholder only to avoid errors!**
- - [ ] mssql_​next_​result
+ - [x] mssql_​next_​result
  - [x] mssql_​num_​fields
  - [x] mssql_​num_​rows
  - [x] mssql_​pconnect
  - [x] mssql_​query
- - [ ] mssql_​result
+ - [x] mssql_​result
  - [x] mssql_​rows_​affected
  - [x] mssql_​select_​db
 
+The stored procedure API (`mssql_init` / `mssql_bind` / `mssql_execute`) is not covered; call procedures with `mssql_query("EXEC ...")` instead. Patches are of course very welcomed!
 
+## Running the smoke test
 
+The test uses an in-memory SQLite database, so it needs no SQL Server:
 
-  [PHP7]: <http://php.net/>
+```bash
+$ composer test
+# or against any PHP version:
+$ docker run --rm -v "$PWD":/app php:5.6-cli php /app/tests/smoke_test.php
+```
+
   [PDO]: <http://php.net/manual/en/book.pdo.php>
   [PDO DBLib]: <http://php.net/manual/en/ref.pdo-dblib.php>
   [IUS]: <https://ius.io/>
